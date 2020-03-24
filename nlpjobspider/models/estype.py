@@ -22,6 +22,7 @@ class NlpJobType(DocType):
     company = Text(analyzer="ik_max_word")
     location = Text(analyzer="ik_max_word")
     job_description = Text(analyzer="ik_max_word")
+    url = Text()
 
     class Meta:
         index = "nlpjob"

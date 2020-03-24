@@ -20,6 +20,7 @@ class NlpjobSpider(scrapy.Spider):
             yield Request(url=next_url, callback=self.parse)
 
     def parse_details(self, response):
+        url = response.url
         job_item = NlpjobspiderItem()
         title = list(response.xpath("//div[@id='job-details']/h2/text()").getall())[1].strip()
         # print(title)
@@ -35,4 +36,6 @@ class NlpjobSpider(scrapy.Spider):
         job_item["company"] = company
         job_item["location"] = location
         job_item["job_description"] = job_description
+        job_item["url"] = url
+
         yield job_item

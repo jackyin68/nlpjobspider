@@ -9,7 +9,9 @@ import scrapy
 from nlpjobspider.models.estype import NlpJobType
 from w3lib.html import remove_tags
 from elasticsearch_dsl.connections import connections
+import redis
 
+redis_cli = redis.StrictRedis()
 es = connections.create_connection(NlpJobType._doc_type.using)
 
 
@@ -36,14 +38,17 @@ class NlpjobspiderItem(scrapy.Item):
     company = scrapy.Field()
     location = scrapy.Field()
     job_description = scrapy.Field()
+    url = scrapy.Field()
 
     def save_to_es(self):
         nlpjob = NlpJobType()
         nlpjob.title = self['title']
         nlpjob.company = self['company']
         nlpjob.location = self['location']
-        nlpjob.job_description = remove_tags(self['job_description'])
+        nlpjob.url = self['url']
+        nlpjob.job_description = "".join(remove_tags(self['job_description']))
         nlpjob.suggest = gen_suggests(NlpJobType._doc_type.index,
                                       ((nlpjob.title, 10), (nlpjob.company, 10), (nlpjob.location, 8)))
         nlpjob.save()
+        redis_cli.incr("nlpjob_count")
         return
